@@ -154,9 +154,13 @@ class main extends CI_Controller {
 	}
 
 	public function addAchievement(){
-		echo "In Progress";
+		$this->load->model("connector");
+		$s = (string)$this->connector->getUserIDFromEmail($_GET["friend_email"]);
+		echo $s;
 	}
-	
-	
+
+
+
+
 }
 ?>
