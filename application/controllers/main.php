@@ -99,11 +99,11 @@ class main extends CI_Controller {
 	public function getFriendships(){
 		if (isset($_GET["uid"])){
 			$this->load->model("connector");
-			$result = $this->connector->getFriendships($_GET["uid"]));
+			$result = $this->connector->getFriendships($_GET["uid"]);
 			if ($result->result_array() != NULL){
 				echo json_encode($result->result_array());
 			} else {
-				echo "ERROR"
+				echo "ERROR";
 			}
 		} else {
 			echo "ERROR: NOT ALL FIELDS FILLED";
@@ -118,7 +118,7 @@ class main extends CI_Controller {
 			if ($result->result_array() != NULL){
 				echo json_encode($result->result_array());
 			} else {
-				echo "ERROR"
+				echo "ERROR";
 			}
 		} else {
 			echo "ERROR: NOT ALL FIELDS FILLED";
@@ -132,7 +132,7 @@ class main extends CI_Controller {
 			if ($result->result_array() != NULL){
 				echo json_encode($result->result_array());
 			} else {
-				echo "ERROR"
+				echo "ERROR";
 			}
 		} else {
 			echo "ERROR: NOT ALL FIELDS FILLED";
@@ -146,7 +146,7 @@ class main extends CI_Controller {
 			if ($result->result_array() != NULL){
 				echo json_encode($result->result_array());
 			} else {
-				echo "ERROR"
+				echo "ERROR";
 			}
 		} else {
 			echo "ERROR: NOT ALL FIELDS FILLED";

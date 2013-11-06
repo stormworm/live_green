@@ -52,7 +52,7 @@ class Connector extends CI_Model {
 		$query_string = "SELECT id FROM users WHERE email = '". $email ."'";		
 		$result = $this->db->query($query_string);
 		//TODO: CHECK WHAT THIS ACTUALLY RETURNS
-		return $result->result_array()[0];
+		return array_shift(array_values($result->result_array()));
 	}
 
 	function getUserByID($uid){
