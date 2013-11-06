@@ -22,7 +22,7 @@ login
 // Takes the users ID and a friends email and creates a new friendship. Automatically creates a paired friendship
 // returns the friendship information for the inviter
 addFriendship
-- uid
+- uid_1
 - friend_email
 
 // returns the friendships of a user by user ID
