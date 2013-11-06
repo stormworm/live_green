@@ -14,9 +14,21 @@ class main extends CI_Controller {
 				case "addFriendship":
 					$this->addFriendship();
 					break;
+				case "getFriendships":
+					$this->getFriendships();
+					break;
 				case "addAchievement":
 					$this->addAchievement();
 					break;
+				case "getFriendshipsWithEmail":
+					$this->getFriendshipsWithEmail();
+					break;
+				case "getUserByID":
+					$this->getUserByID();
+					break;	
+				case "getUserByEmail":
+					$this->getUserByEmail();
+					break;	
 			}
 		} else {
 			echo "ERROR";
@@ -69,12 +81,80 @@ class main extends CI_Controller {
 	}
 	
 	public function addFriendship(){		
-		echo "Hello World";
-		return;
+		if (isset($_GET["uid_1"]) && isset($_GET["friend_email"])){
+			$this->load->model("connector");
+			$friend_id = $this->connector->getUserIDFromEmail($_GET["friend_email"]);
+			$ret_data = $this->connector->addNewFriendship($_GET["uid_1"], $friend_id);	
+			if ($ret_data != NULL){
+				$data = array("uid_1"=> $_GET["uid_1"], "uid_2"=>$friend_id);
+				echo "[" . json_encode($data) . "]";
+			} else {
+				echo "ERROR: FRIENDSHIP NOT ADDED";	
+			}
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}
+	}
+
+	public function getFriendships(){
+		if (isset($_GET["uid"])){
+			$this->load->model("connector");
+			$result = $this->connector->getFriendships($_GET["uid"]));
+			if ($result->result_array() != NULL){
+				echo json_encode($result->result_array());
+			} else {
+				echo "ERROR"
+			}
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}
+	}
+
+	public function getFriendshipsWithEmail(){
+		if (isset($_GET["email"])){
+			$this->load->model("connector");
+			$uid = $this->connector->getUserIDFromEmail($_GET["email"]);
+			$result = $this->connector->getFriendships($uid);
+			if ($result->result_array() != NULL){
+				echo json_encode($result->result_array());
+			} else {
+				echo "ERROR"
+			}
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}
+	}
+
+	public function getUserByID(){
+		if (isset($_GET["uid"])){
+			$this->load->model("connector");
+			$result = $this->connector->getUserByID($_GET["uid"]);			
+			if ($result->result_array() != NULL){
+				echo json_encode($result->result_array());
+			} else {
+				echo "ERROR"
+			}
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}
+	}
+
+	public function getUserByEmail(){
+		if (isset($_GET["email"])){
+			$this->load->model("connector");
+			$result = $this->connector->getUserByEmail($_GET["email"]);			
+			if ($result->result_array() != NULL){
+				echo json_encode($result->result_array());
+			} else {
+				echo "ERROR"
+			}
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}	
 	}
 
 	public function addAchievement(){
-		return;
+		echo "In Progress";
 	}
 	
 	

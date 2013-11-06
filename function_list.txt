@@ -1,0 +1,42 @@
+-----------------
+| API Functions |
+-----------------
+
+// Adds a new user to the database
+// returns the user information 
+addUser
+- name 
+- email
+- password
+- house_size
+- num_family_members
+- heat_type
+- picture (optional)
+
+// Logs user in
+// returns user information or "ERROR" if email address or password is wrong
+login 
+- email
+- password
+
+// Takes the users ID and a friends email and creates a new friendship. Automatically creates a paired friendship
+// returns the friendship information for the inviter
+addFriendship
+- uid
+- friend_email
+
+// returns the friendships of a user by user ID
+getFriendships
+- uid
+
+// returns the friendships of a user by user email
+getFriendshipsWithEmail
+- email
+
+// Returns the user data by user ID
+getUserByID
+- uid
+
+// Returns the user data by user email
+getUserByEmail
+- email
