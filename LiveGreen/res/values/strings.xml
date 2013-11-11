@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Live Green</string>
+    <string name="action_settings">Utilities</string>
+    	 <string name="action_settings_all">All Utility</string>
+    	 <string name="action_settings_add">Add Utility</string>
+    <string name="action_people">People</string>
+    <string name="action_logout">Logout</string>
+    <string name="action_privacy">Privacy</string>
+
+    <string name="title_activity_login">Live Green</string>
+
+    <!-- Strings related to login -->
+    <string name="prompt_email">Email</string>
+    <string name="prompt_password">Password</string>
+    <string name="action_signin">Sign in</string>
+    <string name="action_register">Sign Up</string>
+    <string name="action_confirm">Resend Confirmation</string>
+    <string name="action_sign_in_short">Sign in</string>
+    <string name="action_forgot_password">Recover lost password</string>
+    <string name="login_progress_signing_in">Signing in&#8230;</string>
+    <string name="error_invalid_email">This email address is invalid</string>
+    <string name="error_invalid_password">This password is too short</string>
+    <string name="error_incorrect_password">This password is incorrect</string>
+    <string name="error_field_required">This field is required</string>
+    <string name="title_activity_user_activity_fragment">UserActivityFragment</string>
+    <string name="title_activity_friend_activity_fragment">FriendActivityFragment</string>
+    <string name="title_activity_achievement_activity_fragment">AchievementActivityFragment</string>
+    <string name="title_activity_tip_offers_activity_fragment">TipOffersActivityFragment</string>
+
+</resources>
