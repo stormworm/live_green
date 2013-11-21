@@ -2,6 +2,12 @@
 | API Functions |
 -----------------
 
+http://stormworm.com/LiveGreen/index.php/main/handler/?module=[NAME_OF_FUNCTION]&[OPTION_1=????]&[OPTION_2=????]&...
+
+Example:
+http://stormworm.com/LiveGreen/index.php/main/handler/?module=login&email=stephen@gmail.com&password=test
+
+
 // Adds a new user to the database
 // returns the user information 
 addUser
