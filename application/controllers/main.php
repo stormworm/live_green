@@ -154,11 +154,12 @@ class main extends CI_Controller {
 	}
 
 	public function addAchievement(){
-		echo "In Progress";
+		$this->load->model("connector");
+		$s = (string)$this->connector->getUserIDFromEmail($_GET["friend_email"]);
+		echo $s;
 	}
 
 	public function addDayEntry($uid, $cost, $start, $duration){
-
 		if (isset($uid) && isset($cost) && isset($start) && isset($duration)){
 			$this->load->model("connector");
 			// TODO: convert start to day
@@ -168,8 +169,6 @@ class main extends CI_Controller {
 		}
 	}
 
-	public 
-	
-	
+
 }
 ?>

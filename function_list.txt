@@ -2,6 +2,12 @@
 | API Functions |
 -----------------
 
+http://stormworm.com/LiveGreen/index.php/main/handler/?module=[NAME_OF_FUNCTION]&[OPTION_1=????]&[OPTION_2=????]&...
+
+Example:
+http://stormworm.com/LiveGreen/index.php/main/handler/?module=login&email=stephen@gmail.com&password=test
+
+
 // Adds a new user to the database
 // returns the user information 
 addUser
@@ -22,7 +28,7 @@ login
 // Takes the users ID and a friends email and creates a new friendship. Automatically creates a paired friendship
 // returns the friendship information for the inviter
 addFriendship
-- uid
+- uid_1
 - friend_email
 
 // returns the friendships of a user by user ID

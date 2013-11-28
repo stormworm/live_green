@@ -1,0 +1,10 @@
+<layer-list
+xmlns:android="http://schemas.android.com/apk/res/android">
+ 
+   <item android:drawable="@drawable/shadow_textedit_header"/>
+   <item
+     android:drawable="@drawable/textviewbg"
+     android:bottom="4px"
+     android:top="2px" android:left="1px" android:right="1px" /> 
+ 
+</layer-list>
