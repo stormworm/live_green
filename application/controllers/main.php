@@ -28,7 +28,7 @@ class main extends CI_Controller {
 					break;	
 				case "getUserByEmail":
 					$this->getUserByEmail();
-					break;	
+					break;				
 			}
 		} else {
 			echo "ERROR";
@@ -156,6 +156,19 @@ class main extends CI_Controller {
 	public function addAchievement(){
 		echo "In Progress";
 	}
+
+	public function addDayEntry($uid, $cost, $start, $duration){
+
+		if (isset($uid) && isset($cost) && isset($start) && isset($duration)){
+			$this->load->model("connector");
+			// TODO: convert start to day
+			$result = $this->connector->addDayData($start, $duration, $cost);			
+		} else {
+			return;
+		}
+	}
+
+	public 
 	
 	
 }
