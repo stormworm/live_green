@@ -169,6 +169,38 @@ class main extends CI_Controller {
 		}
 	}
 
-
+	public function scrapeXMLFile(){
+		try{			
+			$this->load->helper('url');			
+			$xml = simplexml_load_file(base_url() . "xml/1hrLP_32Days.xml");
+			foreach($xml->entry as $ent){
+			if(isset($ent->content->IntervalBlock)){
+				foreach($ent->content->IntervalBlock as $block){
+					foreach($block->IntervalReading as $record){
+						$cost = $record->cost[0];
+						$start = $record->timePeriod[0]->start[0];
+						$duration = $record->timePeriod[0]->duration[0];
+						if (isset($_GET["uid"])){
+							$uid = $_GET["uid"];
+						} else {
+							$uid = 1;
+						}
+						try{
+							$this->addDayEntry($uid, $cost, $start, $duration);
+						} catch (Exception $e){
+							echo "Failed to add data";
+						}
+						// echo("Cost = ".$record->cost[0]."<br>" );
+						// echo("Sart = ".$record->timePeriod[0]->start[0]."<br>");
+						// echo("Duration = ".$record->timePeriod[0]->duration[0]);
+						echo("Success");
+						}
+					}
+				}		
+			}
+		} catch(Exception $e){
+			echo "Failed";
+		}
+	}
 }
 ?>

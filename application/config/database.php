@@ -48,10 +48,10 @@
 $active_group = 'default';
 $active_record = TRUE;
 
-$db['default']['hostname'] = '';
-$db['default']['username'] = '';
-$db['default']['password'] = '';
-$db['default']['database'] = '';
+$db['default']['hostname'] = '198.89.120.53';
+$db['default']['username'] = 'wifivibe_liveg';
+$db['default']['password'] = '6-[bG,6?^G_2';
+$db['default']['database'] = 'wifivibe_livegreen';
 $db['default']['dbdriver'] = 'mysql';
 $db['default']['dbprefix'] = '';
 $db['default']['pconnect'] = TRUE;

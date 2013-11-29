@@ -68,14 +68,13 @@ class Connector extends CI_Model {
 	}
 
 	function addDailyEntry($uid, $cost, $start, $duration){
-		$data = array("start"=>$start, "cost"=>$cost, "duration"=>$duraction);
+		$data = array("uid"=>$uid, "start"=>$start, "cost"=>$cost, "duration"=>$duraction);
 		try{
 			$this->db->insert('daily_data', $data);
 		} catch (Exception $e){
 			return;
 		}
 	}
-
 }
 
 ?>
