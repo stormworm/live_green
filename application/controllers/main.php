@@ -163,7 +163,7 @@ class main extends CI_Controller {
 		if (isset($uid) && isset($cost) && isset($start) && isset($duration)){
 			$this->load->model("connector");
 			// TODO: convert start to day
-			$result = $this->connector->addDailyEntry($uid, $start, $duration, $cost);			
+			$result = $this->connector->addDailyEntry($uid, $cost, $start, $duration);			
 		} else {
 			return;
 		}
