@@ -28,7 +28,12 @@ class main extends CI_Controller {
 					break;	
 				case "getUserByEmail":
 					$this->getUserByEmail();
-					break;				
+					break;	
+				case "dayData":
+					$this->dayData();
+					break;
+				case "dayDataRange":
+					$this->dayDataRange();			
 			}
 		} else {
 			echo "ERROR";
@@ -37,24 +42,11 @@ class main extends CI_Controller {
 
 	public function addUser(){
 		$this->load->model("connector");
-		if (isset($_GET["name"]) && isset($_GET["email"]) && isset($_GET["password"]) && isset($_GET["house_size"]) && isset($_GET["num_family_members"]) && isset($_GET["heat_type"])){
+		if (isset($_GET["name"]) && isset($_GET["email"]) && isset($_GET["password"])){
 			try{									
-				if (isset($_GET['picture'])){
-					$picture = $_GET['picture'];
-				} else {
-					$picture = "";
-				}
-				$retData = $this->connector->addNewUser($_GET["name"], $_GET["email"], $_GET["password"], $picture,$_GET["house_size"], $_GET["num_family_members"], $_GET["heat_type"]);
-				if ($retData){
-					$data =  array("name"=>$_GET["name"],
-							   "email"=>$_GET["email"],
-							   "password"=>$_GET["password"],
-							   "picture"=>$picture,
-							   "house_size"=>$_GET["house_size"],
-							   "num_family_members"=>$_GET["num_family_members"],
-							   "heat_type"=>$_GET["heat_type"]
-							);
-					echo "[" . json_encode($data) . "]";
+				$retData = $this->connector->addNewUser($_GET["name"], $_GET["email"], $_GET["password"]);
+				if ($retData){					
+					echo "SUCCESS";
 				} else {
 					echo "ERROR: USER NOT ADDED";
 				}				
@@ -79,7 +71,7 @@ class main extends CI_Controller {
 			echo "ERROR";
 		} 
 	}
-	
+
 	public function addFriendship(){		
 		if (isset($_GET["uid_1"]) && isset($_GET["friend_email"])){
 			$this->load->model("connector");
@@ -159,25 +151,45 @@ class main extends CI_Controller {
 		echo $s;
 	}
 
-	public function addDayEntry($uid, $cost, $start, $duration){
+	public function addDayEntry($uid, $cost, $start, $duration, $usage){
 		if (isset($uid) && isset($cost) && isset($start) && isset($duration)){
 			$this->load->model("connector");
 			// TODO: convert start to day
-			$result = $this->connector->addDailyEntry($uid, $cost, $start, $duration);			
+			$result = $this->connector->addDailyEntry($uid, $cost, $start, $duration, $usage);			
 		} else {
 			return;
 		}
 	}
 
+
+	public function getDailyUsage(){
+		if (isset($_GET["uid"])){
+			$this->load->model("connector");
+			$result = $this->connector->getDailyUsage($_GET["uid"]);			
+			if ($result->result_array() != NULL){
+				echo json_encode($result->result_array());
+			} else {
+				echo "ERROR";
+			}
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}	
+	}
+
+
+
 	public function scrapeXMLFile(){
 		try{			
 			$this->load->helper('url');			
+			$this->load->helper('date');
 			$xml = simplexml_load_file(base_url() . "xml/1hrLP_32Days.xml");
+			$i = 0;
 			foreach($xml->entry as $ent){
 			if(isset($ent->content->IntervalBlock)){
 				foreach($ent->content->IntervalBlock as $block){
 					foreach($block->IntervalReading as $record){
 						$cost = $record->cost[0];
+						$usage = $record->value[0];						
 						$start = $record->timePeriod[0]->start[0];
 						$duration = $record->timePeriod[0]->duration[0];
 						if (isset($_GET["uid"])){
@@ -186,14 +198,12 @@ class main extends CI_Controller {
 							$uid = 1;
 						}
 						try{
-							$this->addDayEntry($uid, $cost, $start, $duration);
+							$start = gmdate('Y-m-d H:i:s', intval($start));
+							$this->addDayEntry($uid, $cost, $start, $duration, $usage);
 						} catch (Exception $e){
 							echo "Failed to add data";
 						}
-						// echo("Cost = ".$record->cost[0]."<br>" );
-						// echo("Sart = ".$record->timePeriod[0]->start[0]."<br>");
-						// echo("Duration = ".$record->timePeriod[0]->duration[0]);
-						echo("Success");
+						
 						}
 					}
 				}		
@@ -201,6 +211,63 @@ class main extends CI_Controller {
 		} catch(Exception $e){
 			echo "Failed";
 		}
+	}
+
+	public function dayData(){
+		if (isset($_GET["uid"])){
+			$this->load->model("connector");
+			if (isset($_GET["date"])){
+				$date = $_GET["date"];
+			} else {
+				$date = date("Y-m-d");
+			}
+			$startDate = $date . " 00:00:00";
+			$endDate = $date . " 23:00:00";
+						
+			$result = $this->connector->getUsageBetween($_GET["uid"], $startDate , $endDate);
+
+			if ($result->result_array() != NULL){
+				$return = array();				
+				$return[] = $result->row(0);				
+				echo json_encode($return);
+			} else {
+				echo "ERROR";
+			}
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}	
+	}
+
+	public function dayDataRange(){
+		if (isset($_GET["uid"])){
+			$this->load->model("connector");
+			if (isset($_GET["end_date"])){
+				$endDate = $_GET["end_date"];
+			} else {
+				$endDate = date("Y-m-d");
+			}
+			if (isset($_GET["start_date"])){
+				$startDate = $_GET["start_date"];
+			} else {
+				$startDate = date("Y-m-d");
+			}
+
+			$startDate = $startDate . " 00:00:00";
+			$endDate = $endDate . " 23:00:00";
+						
+			$result = $this->connector->getUsageBetween($_GET["uid"], $startDate , $endDate);
+
+			if ($result->result_array() != NULL){
+				$return = array();				
+				$return[] = $result->row(0);				
+				echo json_encode($return);
+			} else {
+				echo "ERROR";
+			}
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}	
+
 	}
 }
 ?>

@@ -6,15 +6,11 @@ class Connector extends CI_Model {
 		$this->load->database();
 	}
 	
-	function addNewUser($name, $email, $password, $picture, $house_size, $num_family_members, $heat_type){
+	function addNewUser($name, $email, $password){
 		$data = array(
 			'name'=>$name,
 			'email'=>$email,
-			'password'=>$password,
-			'picture'=>$picture,
-			'house_size'=>$house_size,
-			'num_family_members'=>$num_family_members,
-			'heat_type'=>$heat_type	
+			'password'=>$password,			
 		);	
 
 		try{
@@ -25,7 +21,7 @@ class Connector extends CI_Model {
 	}	
 	
 	function login($email, $password){
-		$query_string = "SELECT *
+		$query_string = "SELECT id as uid
 						 FROM users
 						 WHERE email = '" . $email .
 						 "' AND password = '" . $password . "'"; 		
@@ -67,14 +63,23 @@ class Connector extends CI_Model {
 		return $result;	
 	}
 
-	function addDailyEntry($uid, $cost, $start, $duration){
-		$data = array("uid"=>$uid, "start"=>$start, "cost"=>$cost, "duration"=>$duration);
+	function addDailyEntry($uid, $cost, $start, $duration, $usage){
+		$data = array("uid"=>$uid, "start"=>$start, "cost"=>$cost, "duration"=>$duration, "usage"=>$usage);
 		try{
 			$this->db->insert('daily_data', $data);
 		} catch (Exception $e){
 			return;
 		}
 	}
+
+	function getUsageBetween($uid, $startDate, $endDate){
+		$query = "SELECT `start` as `date`, SUM(`usage`) / 1000 as 'usage', SUM(`cost`) / 100000 as 'cost' FROM daily_data WHERE `start` BETWEEN '" . $startDate . "' AND '". $endDate . "'";		
+		$result = $this->db->query($query);		
+		return $result;	
+	}	
+
+
+
 }
 
 ?>
