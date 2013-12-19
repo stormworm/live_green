@@ -38,9 +38,9 @@ class main extends CI_Controller {
 				case "weekData":
 					$this->weekData();
 					break;
-				// case "monthData":
-				// 	$this->monthData();
-				// 	break;
+				case "monthData":
+					$this->monthData();
+					break;
 			}
 		} else {
 			echo "ERROR";
@@ -322,29 +322,29 @@ class main extends CI_Controller {
 		}	
 	}
 
-	// public function monthData(){
-	// 	if (isset($_GET["uid"])){
-	// 		$this->load->model("connector");
-	// 		if (isset($_GET["date"])){
-	// 			$date = $_GET["date"];
-	// 		} else {
-	// 			$date = date("Y-m-d");
-	// 		}
-	// 		$startDate = $date . " 00:00:00";
-	// 		$endDate = $this->getEndOfWeek($startDate);					
-	// 		$result = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate);
-
-	// 		if ($result->result_array() != NULL){
-	// 			$return = array();				
-	// 			$return[] = $result->row(0);				
-	// 			echo json_encode($return);
-	// 		} else {
-	// 			echo "ERROR";
-	// 		}
-	// 	} else {
-	// 		echo "ERROR: NOT ALL FIELDS FILLED";
-	// 	}	
-	// }
+	public function monthData(){
+		if (isset($_GET["uid"])){
+			$this->load->model("connector");
+			if (isset($_GET["date"])){
+				$date = $_GET["date"];
+			} else {
+				$date = date("Y-m-d");
+			}
+			$startDate = $this->getStartOfMonth($date);
+			//Include current day
+			$endDate = date('Y-m-d', strtotime($date. ' + 1 days'));
+			$result = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate);	
+			if ($result->result_array() != NULL){
+				$return = array();				
+				$return[] = $result->row(0);				
+				echo json_encode($return);
+			} else {
+				echo "ERROR";
+			}
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}	
+	}
 
 	function getStartOfWeek($inDate) {
 		$date = strtotime( date('Y-m-d', strtotime($inDate))); 		
@@ -355,6 +355,11 @@ class main extends CI_Controller {
 		    $start = date('Y-m-d', $start);		    
 		}	
 		return $start;   
+	}
+
+	function getStartOfMonth($inDate) {
+		$date = date('Y-m-01', strtotime($inDate)); 				
+		return $date;
 	}
 }
 ?>
