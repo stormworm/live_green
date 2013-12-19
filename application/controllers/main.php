@@ -186,7 +186,7 @@ class main extends CI_Controller {
 		try{			
 			$this->load->helper('url');			
 			$this->load->helper('date');
-			$xml = simplexml_load_file(base_url() . "xml/1hrLP_32Days.xml");
+			$xml = simplexml_load_file(base_url() . "xml/hourlyForMonthApr.xml");
 			$i = 0;
 			foreach($xml->entry as $ent){
 			if(isset($ent->content->IntervalBlock)){
@@ -202,7 +202,8 @@ class main extends CI_Controller {
 							$uid = 1;
 						}
 						try{
-							$start = gmdate('Y-m-d H:i:s', intval($start));
+							$start = gmdate('Y-m-d H:i:s', intval($start));							
+							$start = date('Y-m-d H:i:s', strtotime($start. '+ 1 years'));
 							$this->addDayEntry($uid, $cost, $start, $duration, $usage);
 						} catch (Exception $e){
 							echo "Failed to add data";
@@ -226,7 +227,7 @@ class main extends CI_Controller {
 				$date = date("Y-m-d");
 			}
 			$startDate = $date . " 00:00:00";
-			$endDate =  date('Y-m-d', strtotime($startDate. ' + 1 days'));
+			$endDate =  date('Y-m-d', strtotime($startDate . ' + 1 days'));
 
 			$result = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate);
 
