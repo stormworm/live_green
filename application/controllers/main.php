@@ -33,7 +33,8 @@ class main extends CI_Controller {
 					$this->dayData();
 					break;
 				case "dayDataRange":
-					$this->dayDataRange();			
+					$this->dayDataRange();
+					break;			
 			}
 		} else {
 			echo "ERROR";
@@ -251,19 +252,36 @@ class main extends CI_Controller {
 			} else {
 				$startDate = date("Y-m-d");
 			}
-
+			//find the difference between the two dates
 			$startDate = $startDate . " 00:00:00";
-			$endDate = $endDate . " 23:00:00";
-						
-			$result = $this->connector->getUsageBetween($_GET["uid"], $startDate , $endDate);
+			$endDate = $endDate . " 00:00:00";
+			
+			$d_start = new DateTime($startDate);
+			$d_end = new DateTime($endDate);
+			$diff = $d_start->diff($d_end);
+			$day_diff = $diff->format("%d");
+			$unixStartDay = strtotime($startDate);
 
-			if ($result->result_array() != NULL){
-				$return = array();				
-				$return[] = $result->row(0);				
-				echo json_encode($return);
-			} else {
-				echo "ERROR";
+			for ($i = 0; $i < $day_diff; $i++) {
+				$unixEndDay = mktime(24, 0, 0, date('m',$unixStartDay),
+						date('d',$unixStartDay), date('Y', $unixStartDay));
+				
+				$result = $this->connector->getUsageBetween($_GET["uid"], 
+						date("Y-m-d h:i:s", $unixStartDay), date("Y-m-d h:i:s", $unixEndDay));
+				if ($result->result_array() != NULL){
+					$return = array();
+					$return[] = $result->row(0);
+					echo json_encode($return);
+				} else {
+					echo "ERROR";
+				}
+				echo "<br/> start: " . date("Y-m-d h:i:s", $unixStartDay); 
+				echo "<br/> end: " . date("Y-m-d h:i:s", $unixEndDay) . "<br/>";
+				//set the new start and end to one day later
+				$unixStartDay = mktime(0, 0, 0, date('m',$unixStartDay),
+						date('d',$unixStartDay)+1, date('Y', $unixStartDay));
 			}
+			
 		} else {
 			echo "ERROR: NOT ALL FIELDS FILLED";
 		}	
