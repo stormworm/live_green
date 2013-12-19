@@ -34,7 +34,13 @@ class main extends CI_Controller {
 					break;
 				case "dayDataRange":
 					$this->dayDataRange();
-					break;			
+					break;
+				case "weekData":
+					$this->weekData();
+					break;
+				// case "monthData":
+				// 	$this->monthData();
+				// 	break;
 			}
 		} else {
 			echo "ERROR";
@@ -162,7 +168,6 @@ class main extends CI_Controller {
 		}
 	}
 
-
 	public function getDailyUsage(){
 		if (isset($_GET["uid"])){
 			$this->load->model("connector");
@@ -176,8 +181,6 @@ class main extends CI_Controller {
 			echo "ERROR: NOT ALL FIELDS FILLED";
 		}	
 	}
-
-
 
 	public function scrapeXMLFile(){
 		try{			
@@ -223,14 +226,30 @@ class main extends CI_Controller {
 				$date = date("Y-m-d");
 			}
 			$startDate = $date . " 00:00:00";
-			$endDate = $date . " 23:00:00";
-						
-			$result = $this->connector->getUsageBetween($_GET["uid"], $startDate , $endDate);
+			$endDate =  date('Y-m-d', strtotime($startDate. ' + 1 days'));
+
+			$result = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate);
 
 			if ($result->result_array() != NULL){
 				$return = array();				
 				$return[] = $result->row(0);				
 				echo json_encode($return);
+			} else {
+				echo "ERROR";
+			}
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}	
+	}
+
+		public function rangeDataRaw($uid, $start, $end){
+		if (isset($_GET["uid"])){
+			$this->load->model("connector");			
+			$result = $this->connector->getUsageBetween($uid, $start , $end);
+			if ($result->result_array() != NULL){
+				$return = array();				
+				$return[] = $result->row(0);				
+				return $result;
 			} else {
 				echo "ERROR";
 			}
@@ -253,39 +272,89 @@ class main extends CI_Controller {
 				$startDate = date("Y-m-d");
 			}
 			//find the difference between the two dates
-			$startDate = $startDate . " 00:00:00";
-			$endDate = $endDate . " 00:00:00";
+			$startDateWithSeconds = $startDate . " 00:00:00";
+			$endDateWithSeconds = $endDate . " 00:00:00";
 			
-			$d_start = new DateTime($startDate);
-			$d_end = new DateTime($endDate);
+			$d_start = new DateTime($startDateWithSeconds);
+			$d_end = new DateTime($endDateWithSeconds);
 			$diff = $d_start->diff($d_end);
-			$day_diff = $diff->format("%d");
-			$unixStartDay = strtotime($startDate);
+			$day_diff = $diff->format("%d");			
+			$return = array();
 
-			for ($i = 0; $i < $day_diff; $i++) {
-				$unixEndDay = mktime(24, 0, 0, date('m',$unixStartDay),
-						date('d',$unixStartDay), date('Y', $unixStartDay));
-				
-				$result = $this->connector->getUsageBetween($_GET["uid"], 
-						date("Y-m-d h:i:s", $unixStartDay), date("Y-m-d h:i:s", $unixEndDay));
-				if ($result->result_array() != NULL){
-					$return = array();
+			for ($i = 0; $i <= $day_diff; $i++) {
+				$nextDay = date('Y-m-d', strtotime($startDate. ' + 1 days'));
+				$result = $this->rangeDataRaw($_GET["uid"], $startDate, $nextDay);
+				if ($result->result_array() != NULL){			
 					$return[] = $result->row(0);
-					echo json_encode($return);
 				} else {
 					echo "ERROR";
-				}
-				echo "<br/> start: " . date("Y-m-d h:i:s", $unixStartDay); 
-				echo "<br/> end: " . date("Y-m-d h:i:s", $unixEndDay) . "<br/>";
-				//set the new start and end to one day later
-				$unixStartDay = mktime(0, 0, 0, date('m',$unixStartDay),
-						date('d',$unixStartDay)+1, date('Y', $unixStartDay));
+				}				
+				$startDate = $nextDay;
 			}
-			
+			echo json_encode($return);
 		} else {
 			echo "ERROR: NOT ALL FIELDS FILLED";
 		}	
+	}
 
+	public function weekData(){
+		if (isset($_GET["uid"])){
+			$this->load->model("connector");
+			if (isset($_GET["date"])){
+				$date = $_GET["date"];
+			} else {
+				$date = date("Y-m-d");
+			}			
+			$startDate = $this->getStartOfWeek($date);
+			//Include current day
+			$endDate = date('Y-m-d', strtotime($date. ' + 1 days'));
+			$result = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate);
+
+			if ($result->result_array() != NULL){
+				$return = array();				
+				$return[] = $result->row(0);				
+				echo json_encode($return);
+			} else {
+				echo "ERROR";
+			}
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}	
+	}
+
+	// public function monthData(){
+	// 	if (isset($_GET["uid"])){
+	// 		$this->load->model("connector");
+	// 		if (isset($_GET["date"])){
+	// 			$date = $_GET["date"];
+	// 		} else {
+	// 			$date = date("Y-m-d");
+	// 		}
+	// 		$startDate = $date . " 00:00:00";
+	// 		$endDate = $this->getEndOfWeek($startDate);					
+	// 		$result = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate);
+
+	// 		if ($result->result_array() != NULL){
+	// 			$return = array();				
+	// 			$return[] = $result->row(0);				
+	// 			echo json_encode($return);
+	// 		} else {
+	// 			echo "ERROR";
+	// 		}
+	// 	} else {
+	// 		echo "ERROR: NOT ALL FIELDS FILLED";
+	// 	}	
+	// }
+
+	function getStartOfWeek($inDate) {
+		$date = strtotime( date('Y-m-d', strtotime($inDate))); 		
+		if ($num = date('N', strtotime($inDate)) == 7){
+			$start = date('Y-m-d', $date);
+		} else {
+		    $start = strtotime('this week last sunday', $date);	    
+		    $start = date('Y-m-d', $start);		    
+		}	
+		return $start;   
 	}
 }
 ?>
