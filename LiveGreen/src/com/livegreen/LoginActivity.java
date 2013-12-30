@@ -181,8 +181,6 @@ public class LoginActivity extends Activity {
 			@Override
 			public void onClick(View v) {
 				
-				displayLocationIntent(1,"");
-				
 				pd.setTitle("Processing...");
 				pd.setMessage("Please wait.");
 				pd.setCancelable(false);
@@ -196,30 +194,19 @@ public class LoginActivity extends Activity {
          	   Thread backgroundThread = new Thread(new Runnable() {            
 			        @Override
 			        public void run() {
-			           
-
 			            runOnUiThread(new Runnable() {                    
 			                @Override
 			                public void run() {
 			                	try {
-			                		Global.userid = 0;
-			                		String jis = webc.userLogin(email.getText().toString(), pass.getText().toString());
-			                		if(!"blocked".equals(jis)){
-				                		JSONArray jArray = webc.getJson(jis);
-				             	   		int userid = jArray.getJSONObject(0).getInt("ID"); 
-				             	   		String username = jArray.getJSONObject(0).getString("nickname");
-				             	   		if(userid > 0){
-				             	   			SharedPreferences settings = getSharedPreferences(Global.PREFS_NAME, 0);
-				             	   			SharedPreferences.Editor editor = settings.edit();
-				             	   			editor.putInt("userid", userid);
-				             	   			editor.putString("username", username);
-				             	   			editor.commit();
-				             	   			displayLocationIntent(userid,username);
-				             	   		} else {
-				             	   			Toast.makeText(getApplicationContext(), "Login failed.",Toast.LENGTH_LONG).show();
-				             	   		}
+			                		Global.userid = webc.userLogin(email.getText().toString(), pass.getText().toString());
+			                		if(Global.userid > 0){
+			                			SharedPreferences settings = getSharedPreferences(Global.PREFS_NAME, 0);
+			             	   			SharedPreferences.Editor editor = settings.edit();
+			             	   			editor.putInt("userid", Global.userid);
+			             	   			editor.commit();
+			             	   			displayLocationIntent(Global.userid,"test");
 			                		} else {
-			                			Toast.makeText(getApplicationContext(), "Account blocked. Contact administrator",Toast.LENGTH_LONG).show();
+			                			Toast.makeText(getApplicationContext(), "Login failed.",Toast.LENGTH_LONG).show();
 			                		}
 			             	   	} catch(Exception e){
 			             	   		Toast.makeText(getApplicationContext(), "System busy try again later",Toast.LENGTH_LONG).show();
@@ -230,14 +217,11 @@ public class LoginActivity extends Activity {
 			            });
 			        }
 			    });
-			    //backgroundThread.start();
+			    backgroundThread.start();
          	   pd.dismiss();
-         	   	
-         	   	
+
 			}
-		});
-		
-		
+		});	
 	}
 
 	public void addRegisterListeners(){

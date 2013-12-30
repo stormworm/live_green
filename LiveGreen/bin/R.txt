@@ -25,13 +25,13 @@ int drawable textview 0x7f02000f
 int drawable textviewbg 0x7f020010
 int id action_confirm 0x7f090020
 int id action_forgot_password 0x7f090021
-int id action_logout 0x7f090023
+int id action_logout 0x7f090026
 int id action_people 0x7f090022
 int id action_privacy 0x7f090027
 int id action_register 0x7f09001f
-int id action_settings 0x7f090024
-int id action_settings_add 0x7f090026
-int id action_settings_all 0x7f090025
+int id action_settings 0x7f090023
+int id action_settings_add 0x7f090025
+int id action_settings_all 0x7f090024
 int id action_signin 0x7f09001e
 int id btnLogin 0x7f090006
 int id btnRecover 0x7f090009

@@ -14,12 +14,10 @@ import android.view.Menu;
 import android.view.MenuItem;
 
 public class MainActivity extends FragmentActivity {
-
+	
 	private static final int NUM_PAGES = 4;
 	private ViewPager mPager;
 	private PagerAdapter mPagerAdapter;
-	
-	
 	
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -78,6 +76,7 @@ public class MainActivity extends FragmentActivity {
 			switch(position){
 				case 0:
 					UserActivityFragment uaf1 = new UserActivityFragment();
+					uaf1.setArguments(bundle);
 					return uaf1;
 				case 1:
 					FriendActivityFragment uaf2 = new FriendActivityFragment();
