@@ -78,7 +78,28 @@ class Connector extends CI_Model {
 		return $result;	
 	}	
 
+	function getRelatedUsers($uid, $houseSize, $numMembers){
+		$houseSizeLowerDeviation = $houseSize - ($houseSize * 0.15);
+		$houseSizeHigherDeviation = $houseSize + ($houseSize * 0.15);
+		$numMembersLower = $numMembers - 2;
+		$numMembersHigher = $numMembers + 2;
+		$query = "SELECT * from `users` WHERE `uid` <> " . $uid . " AND `house_size` BETWEEN " . $houseSizeLowerDeviation . " AND " . 
+		          $houseSizeHigherDeviation . " AND  `num_family_members` BETWEEN " . $numMembersLower . " AND " . $numMembersHigher;  
 
+		$result = $result = $this->db->query($query);
+		return $result; 
+	}
+
+	function getRelatedUsersWithHeat($uid, $houseSize, $numMembers, $heatType){
+		$houseSizeLowerDeviation = $houseSize - ($houseSize * 0.15);
+		$houseSizeHigherDeviation = $houseSize + ($houseSize * 0.15);
+		$numMembersLower = $numMembers - 2;
+		$numMembersHigher = $numMembers + 2;
+		$query = "SELECT * from `users` WHERE `uid` <> " . $uid . " AND `house_size` BETWEEN " . $houseSizeLowerDeviation . " AND " . 
+		          $houseSizeHigherDeviation . " AND  `num_family_members` BETWEEN " . $numMembersLower . " AND " . $numMembersHigher . " AND `heat_type` = '" . $heatType . "'";  
+		$result = $result = $this->db->query($query);
+		return $result; 
+	}
 
 }
 

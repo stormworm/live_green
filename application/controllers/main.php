@@ -40,7 +40,10 @@ class main extends CI_Controller {
 					break;
 				case "monthData":
 					$this->monthData();
-					break;
+					break;				
+				case "yearData":
+					$this->yearData();
+					break;				
 			}
 		} else {
 			echo "ERROR";
@@ -299,29 +302,25 @@ class main extends CI_Controller {
 		}	
 	}
 
-	public function weekData(){
-		if (isset($_GET["uid"])){
+	public function findSimilarUsers(){
+		if (isset($_GET["uid"]) && isset($_GET["house_size"]) && isset($_GET["num_users"])){
 			$this->load->model("connector");
-			if (isset($_GET["date"])){
-				$date = $_GET["date"];
+			if (isset($_GET["heat_type"])){
+				$houseSize = intval($_GET["house_size"]);
+				$numUsers = intval($_GET["num_users"]);
+				$result = $this->connector->getRelatedUsersWithHeat($uid, $houseSize, $numUsers, $_GET["heat_type"]);
 			} else {
-				$date = date("Y-m-d");
-			}			
-			$startDate = $this->getStartOfWeek($date);
-			//Include current day
-			$endDate = date('Y-m-d', strtotime($date. ' + 1 days'));
-			$result = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate);
-
+				$result = $this->connector->getRelatedUsers($uid, $houseSize, $numUsers);
+			}
 			if ($result->result_array() != NULL){
-				$return = array();				
-				$return[] = $result->row(0);				
-				echo json_encode($return);
+				echo json_encode($result->result_array());
 			} else {
 				echo "ERROR";
 			}
+
 		} else {
-			echo "ERROR: NOT ALL FIELDS FILLED";
-		}	
+			echo "ERROR";
+		}
 	}
 
 	public function monthData(){
@@ -332,21 +331,103 @@ class main extends CI_Controller {
 			} else {
 				$date = date("Y-m-d");
 			}
+
+			if (!isset($_GET["prev"])){
+				$prevMonths = 0;
+			} else {
+				$prevMonths = intval($_GET["prev"]);
+			}
+
 			$startDate = $this->getStartOfMonth($date);
 			//Include current day
 			$endDate = date('Y-m-d', strtotime($date. ' + 1 days'));
-			$result = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate);	
-			if ($result->result_array() != NULL){
-				$return = array();				
-				$return[] = $result->row(0);				
-				echo json_encode($return);
-			} else {
-				echo "ERROR";
+			$result = array();
+			$result[] = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate)->row(0);
+			$i = 1;
+			while ($i <= $prevMonths){	
+				$addMonth = " + 1 months"; 
+				$subMonth = " - " . $i . " months"; 
+				$start = date('Y-m-d', strtotime($startDate . $subMonth));
+				$end = date('Y-m-d', strtotime($start . $addMonth));				
+				$result[] = $this->rangeDataRaw($_GET["uid"], $start, $end)->row(0);
+				$i++;
 			}
+			$result = array_reverse($result);
+			echo json_encode($result);
+
 		} else {
 			echo "ERROR: NOT ALL FIELDS FILLED";
 		}	
 	}
+
+	public function weekData(){
+		if (isset($_GET["uid"])){
+			$this->load->model("connector");
+			if (isset($_GET["date"])){
+				$date = $_GET["date"];
+			} else {
+				$date = date("Y-m-d");
+			}
+
+			if (!isset($_GET["prev"])){
+				$prevWeeks = 0;
+			} else {
+				$prevWeeks = intval($_GET["prev"]);
+			}
+			$startOfWeek = $this->getStartOfWeek($date);
+			$endDate = date('Y-m-d', strtotime($date. ' + 1 days'));
+			$result = array();
+			$result[] = $this->rangeDataRaw($_GET["uid"], $startOfWeek, $endDate)->row(0);
+			$i = 1;	
+			while ($i <= $prevWeeks){
+				$addWeek = " + 1 weeks"; 
+				$subWeek = " - " . $i . " weeks"; 
+				$start = date('Y-m-d', strtotime($startOfWeek . $subWeek));
+				$end = date('Y-m-d', strtotime($start . $addWeek));				
+				$result[] = $this->rangeDataRaw($_GET["uid"], $start, $end)->row(0);
+				$i++;
+			}
+			$result = array_reverse($result);
+			echo json_encode($result);
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}	
+	}
+
+	public function yearData(){
+		if (isset($_GET["uid"])){
+			$this->load->model("connector");
+			if (isset($_GET["date"])){
+				$date = $_GET["date"];
+			} else {
+				$date = date("Y-m-d");
+			}
+
+			if (!isset($_GET["prev"])){
+				$prevYears = 0;
+			} else {
+				$prevYears = intval($_GET["prev"]);
+			}
+			$startOfYear = $this->getStartOfYear($date);
+			$endDate = date('Y-m-d', strtotime($date. ' + 1 days'));
+			$result = array();
+			$result[] = $this->rangeDataRaw($_GET["uid"], $startOfYear, $endDate)->row(0);
+			$i = 1;	
+			while ($i <= $prevYears){
+				$add = " + 1 years"; 
+				$sub = " - " . $i . " years"; 
+				$start = date('Y-m-d', strtotime($startOfYear . $sub));
+				$end = date('Y-m-d', strtotime($start . $add));				
+				$result[] = $this->rangeDataRaw($_GET["uid"], $start, $end)->row(0);
+				$i++;
+			}
+			$result = array_reverse($result);
+			echo json_encode($result);
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}	
+	}
+
 
 	function getStartOfWeek($inDate) {
 		$date = strtotime( date('Y-m-d', strtotime($inDate))); 		
@@ -363,5 +444,11 @@ class main extends CI_Controller {
 		$date = date('Y-m-01', strtotime($inDate)); 				
 		return $date;
 	}
+
+	function getStartOfYear($inDate) {
+		$date = date('Y-01-01', strtotime($inDate)); 				
+		return $date;
+	}
+
 }
 ?>
