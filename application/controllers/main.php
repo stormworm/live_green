@@ -186,33 +186,34 @@ class main extends CI_Controller {
 		try{			
 			$this->load->helper('url');			
 			$this->load->helper('date');
-			$xml = simplexml_load_file(base_url() . "xml/hourlyForMonthApr.xml");
+			$xml = simplexml_load_file(base_url() . "xml/hourlyForMonthSep.xml");
 			$i = 0;
 			foreach($xml->entry as $ent){
-			if(isset($ent->content->IntervalBlock)){
-				foreach($ent->content->IntervalBlock as $block){
-					foreach($block->IntervalReading as $record){
-						$cost = $record->cost[0];
-						$usage = $record->value[0];						
-						$start = $record->timePeriod[0]->start[0];
-						$duration = $record->timePeriod[0]->duration[0];
-						if (isset($_GET["uid"])){
-							$uid = $_GET["uid"];
-						} else {
-							$uid = 1;
-						}
-						try{
-							$start = gmdate('Y-m-d H:i:s', intval($start));							
-							$start = date('Y-m-d H:i:s', strtotime($start. '+ 1 years'));
-							$this->addDayEntry($uid, $cost, $start, $duration, $usage);
-						} catch (Exception $e){
-							echo "Failed to add data";
-						}
-						
+				if(isset($ent->content->IntervalBlock)){
+					foreach($ent->content->IntervalBlock as $block){
+						foreach($block->IntervalReading as $record){
+							$cost = $record->cost[0];
+							$usage = $record->value[0];						
+							$start = $record->timePeriod[0]->start[0];
+							$duration = $record->timePeriod[0]->duration[0];
+							if (isset($_GET["uid"])){
+								$uid = $_GET["uid"];
+							} else {
+								$uid = 1;
+							}
+							try{
+								$start = gmdate('Y-m-d H:i:s', intval($start));							
+								$start = date('Y-m-d H:i:s', strtotime($start. '+ 1 years'));
+								$this->addDayEntry($uid, $cost, $start, $duration, $usage);
+							} catch (Exception $e){
+								echo "Failed to add data";
+							}
+							
 						}
 					}
 				}		
 			}
+			echo "SUCCESS";
 		} catch(Exception $e){
 			echo "Failed";
 		}

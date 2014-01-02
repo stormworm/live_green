@@ -73,7 +73,7 @@ class Connector extends CI_Model {
 	}
 
 	function getUsageBetween($uid, $startDate, $endDate){
-		$query = "SELECT `start` as `date`, SUM(`usage`) / 1000 as 'usage', SUM(`cost`) / 100000 as 'cost' FROM daily_data WHERE `start` BETWEEN '" . $startDate . "' AND '". $endDate . "'";		
+		$query = "SELECT `start` as `date`, SUM(`usage`) / 1000 as 'usage', SUM(`cost`) / 100000 as 'cost' FROM daily_data WHERE `uid` = ". $uid . " AND `start` BETWEEN '" . $startDate . "' AND '". $endDate . "'";		
 		$result = $this->db->query($query);		
 		return $result;	
 	}	
