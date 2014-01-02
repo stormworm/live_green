@@ -50,13 +50,13 @@ public final class R {
     public static final class id {
         public static final int action_confirm=0x7f090020;
         public static final int action_forgot_password=0x7f090021;
-        public static final int action_logout=0x7f090023;
+        public static final int action_logout=0x7f090026;
         public static final int action_people=0x7f090022;
         public static final int action_privacy=0x7f090027;
         public static final int action_register=0x7f09001f;
-        public static final int action_settings=0x7f090024;
-        public static final int action_settings_add=0x7f090026;
-        public static final int action_settings_all=0x7f090025;
+        public static final int action_settings=0x7f090023;
+        public static final int action_settings_add=0x7f090025;
+        public static final int action_settings_all=0x7f090024;
         public static final int action_signin=0x7f09001e;
         public static final int btnLogin=0x7f090006;
         public static final int btnRecover=0x7f090009;

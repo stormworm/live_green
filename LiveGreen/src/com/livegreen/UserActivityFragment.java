@@ -2,6 +2,10 @@ package com.livegreen;
 
 import java.util.ArrayList;
 
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import com.jjoe64.graphview.GraphView;
 import com.jjoe64.graphview.GraphViewDataInterface;
 import com.jjoe64.graphview.GraphViewSeries;
@@ -18,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 import android.widget.SeekBar;
+import android.widget.Toast;
 
 public class UserActivityFragment extends Fragment {
 
@@ -62,6 +67,29 @@ public class UserActivityFragment extends Fragment {
 	}
 
 	private void setupGraphs() {
+		double today = 0;
+		double yesterday = 0;
+		
+		//Daily Usage
+		String jis = webc.dailyUsage("2012-04-1","2012-04-04");
+		JSONArray jArray = webc.getJson(jis);
+		
+		try {	
+			if(jArray !=  null){
+				for(int i = 0;i < jArray.length();i++){
+					JSONObject obj = jArray.getJSONObject(i);
+					Double usage = obj.getDouble("usage");
+					Double cost = obj.getDouble("cost");
+					String day = obj.getString("date");
+					
+					System.out.println(usage + " " + cost + " " + day);
+				}
+			}			
+		} catch (JSONException e) {
+			Toast.makeText(getActivity(), e.toString(),Toast.LENGTH_LONG).show();
+		} catch (Exception e){
+			Toast.makeText(getActivity(), e.toString(),Toast.LENGTH_LONG).show();
+		}
 
 		days.add(new GraphViewData(1, 100.0d));
 		days.add(new GraphViewData(2, 1.5d));
