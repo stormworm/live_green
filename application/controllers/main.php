@@ -342,14 +342,21 @@ class main extends CI_Controller {
 			//Include current day
 			$endDate = date('Y-m-d', strtotime($date. ' + 1 days'));
 			$result = array();
-			$result[] = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate)->row(0);
+			$res = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate)->row(0);
+			if ($res->date != null){
+					$result[] = $res;
+			}
 			$i = 1;
 			while ($i <= $prevMonths){	
 				$addMonth = " + 1 months"; 
 				$subMonth = " - " . $i . " months"; 
 				$start = date('Y-m-d', strtotime($startDate . $subMonth));
-				$end = date('Y-m-d', strtotime($start . $addMonth));				
-				$result[] = $this->rangeDataRaw($_GET["uid"], $start, $end)->row(0);
+				$end = date('Y-m-d', strtotime($start . $addMonth));
+				$res =	$this->rangeDataRaw($_GET["uid"], $start, $end)->row(0);	
+				if ($res->date != null){
+					$result[] = $res;
+				}
+				
 				$i++;
 			}
 			$result = array_reverse($result);
@@ -377,14 +384,20 @@ class main extends CI_Controller {
 			$startOfWeek = $this->getStartOfWeek($date);
 			$endDate = date('Y-m-d', strtotime($date. ' + 1 days'));
 			$result = array();
-			$result[] = $this->rangeDataRaw($_GET["uid"], $startOfWeek, $endDate)->row(0);
+			$res = $this->rangeDataRaw($_GET["uid"], $startOfWeek, $endDate)->row(0);
+			if ($res->date != null){
+					$result[] = $res;
+			}			
 			$i = 1;	
 			while ($i <= $prevWeeks){
 				$addWeek = " + 1 weeks"; 
 				$subWeek = " - " . $i . " weeks"; 
 				$start = date('Y-m-d', strtotime($startOfWeek . $subWeek));
 				$end = date('Y-m-d', strtotime($start . $addWeek));				
-				$result[] = $this->rangeDataRaw($_GET["uid"], $start, $end)->row(0);
+				$res = $this->rangeDataRaw($_GET["uid"], $start, $end)->row(0);
+				if ($res->date != null){
+					$result[] = $res;
+				}			
 				$i++;
 			}
 			$result = array_reverse($result);
@@ -402,7 +415,6 @@ class main extends CI_Controller {
 			} else {
 				$date = date("Y-m-d");
 			}
-
 			if (!isset($_GET["prev"])){
 				$prevYears = 0;
 			} else {
@@ -411,14 +423,20 @@ class main extends CI_Controller {
 			$startOfYear = $this->getStartOfYear($date);
 			$endDate = date('Y-m-d', strtotime($date. ' + 1 days'));
 			$result = array();
-			$result[] = $this->rangeDataRaw($_GET["uid"], $startOfYear, $endDate)->row(0);
+			$res = $this->rangeDataRaw($_GET["uid"], $startOfYear, $endDate)->row(0);
+			if ($res->date != null){
+					$result[] = $res;
+			}
 			$i = 1;	
 			while ($i <= $prevYears){
 				$add = " + 1 years"; 
 				$sub = " - " . $i . " years"; 
 				$start = date('Y-m-d', strtotime($startOfYear . $sub));
-				$end = date('Y-m-d', strtotime($start . $add));				
-				$result[] = $this->rangeDataRaw($_GET["uid"], $start, $end)->row(0);
+				$end = date('Y-m-d', strtotime($start . $add));
+				$res = $this->rangeDataRaw($_GET["uid"], $start, $end)->row(0);
+				if ($res->date != null){
+					$result[] = $res;
+				}
 				$i++;
 			}
 			$result = array_reverse($result);
