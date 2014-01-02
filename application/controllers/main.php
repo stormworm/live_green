@@ -88,7 +88,7 @@ class main extends CI_Controller {
 			$friend_id = $this->connector->getUserIDFromEmail($_GET["friend_email"]);
 			$ret_data = $this->connector->addNewFriendship($_GET["uid_1"], $friend_id);	
 			if ($ret_data != NULL){
-				$data = array("uid_1"=> $_GET["uid_1"], "uid_2"=>$friend_id);
+				$data = array("uid_1"=>$_GET["uid_1"], "uid_2"=>$friend_id);
 				echo "[" . json_encode($data) . "]";
 			} else {
 				echo "ERROR: FRIENDSHIP NOT ADDED";	
@@ -100,13 +100,18 @@ class main extends CI_Controller {
 
 	public function getFriendships(){
 		if (isset($_GET["uid"])){
-			$this->load->model("connector");
+			$this->load->model("connector");			
 			$result = $this->connector->getFriendships($_GET["uid"]);
-			if ($result->result_array() != NULL){
-				echo json_encode($result->result_array());
-			} else {
-				echo "ERROR";
+			$jsonRes = array();
+			foreach ($result->result() as $row){
+				$resArray = array();				
+				$uid = intval($row->uid);
+				$friendName = $this->getUserInfo($uid)->row(0)->name;				
+				$resArray = array("uid"=>$uid, "name"=>$friendName, "week"=>$this->curWeekDataByUser($uid), 
+					"month"=>$this->curMonthDataByUser($uid),"year"=>$this->curYearDataByUser($uid));
+				$jsonRes[] = $resArray;
 			}
+			echo json_encode($jsonRes);
 		} else {
 			echo "ERROR: NOT ALL FIELDS FILLED";
 		}
@@ -125,6 +130,17 @@ class main extends CI_Controller {
 		} else {
 			echo "ERROR: NOT ALL FIELDS FILLED";
 		}
+	}
+
+	public function getUserInfo($uid){
+		$this->load->model("connector");
+		$result = $this->connector->getUserByID($uid);			
+		if ($result->result_array() != NULL){
+			return $result;
+		} else {
+			return NULL;
+		}
+		
 	}
 
 	public function getUserByID(){
@@ -247,7 +263,28 @@ class main extends CI_Controller {
 		}	
 	}
 
-		public function rangeDataRaw($uid, $start, $end){
+	public function findSimilarUsers(){
+		if (isset($_GET["uid"]) && isset($_GET["house_size"]) && isset($_GET["num_users"])){
+			$this->load->model("connector");
+			if (isset($_GET["heat_type"])){
+				$houseSize = intval($_GET["house_size"]);
+				$numUsers = intval($_GET["num_users"]);
+				$result = $this->connector->getRelatedUsersWithHeat($uid, $houseSize, $numUsers, $_GET["heat_type"]);
+			} else {
+				$result = $this->connector->getRelatedUsers($uid, $houseSize, $numUsers);
+			}
+			if ($result->result_array() != NULL){
+				echo json_encode($result->result_array());
+			} else {
+				echo "ERROR";
+			}
+
+		} else {
+			echo "ERROR";
+		}
+	}
+
+	public function rangeDataRaw($uid, $start, $end){
 		if (isset($_GET["uid"])){
 			$this->load->model("connector");			
 			$result = $this->connector->getUsageBetween($uid, $start , $end);
@@ -264,8 +301,7 @@ class main extends CI_Controller {
 	}
 
 	public function dayDataRange(){
-		if (isset($_GET["uid"])){
-			$this->load->model("connector");
+		if (isset($_GET["uid"])){			
 			if (isset($_GET["end_date"])){
 				$endDate = $_GET["end_date"];
 			} else {
@@ -302,74 +338,8 @@ class main extends CI_Controller {
 		}	
 	}
 
-	public function findSimilarUsers(){
-		if (isset($_GET["uid"]) && isset($_GET["house_size"]) && isset($_GET["num_users"])){
-			$this->load->model("connector");
-			if (isset($_GET["heat_type"])){
-				$houseSize = intval($_GET["house_size"]);
-				$numUsers = intval($_GET["num_users"]);
-				$result = $this->connector->getRelatedUsersWithHeat($uid, $houseSize, $numUsers, $_GET["heat_type"]);
-			} else {
-				$result = $this->connector->getRelatedUsers($uid, $houseSize, $numUsers);
-			}
-			if ($result->result_array() != NULL){
-				echo json_encode($result->result_array());
-			} else {
-				echo "ERROR";
-			}
-
-		} else {
-			echo "ERROR";
-		}
-	}
-
-	public function monthData(){
-		if (isset($_GET["uid"])){
-			$this->load->model("connector");
-			if (isset($_GET["date"])){
-				$date = $_GET["date"];
-			} else {
-				$date = date("Y-m-d");
-			}
-
-			if (!isset($_GET["prev"])){
-				$prevMonths = 0;
-			} else {
-				$prevMonths = intval($_GET["prev"]);
-			}
-
-			$startDate = $this->getStartOfMonth($date);
-			//Include current day
-			$endDate = date('Y-m-d', strtotime($date. ' + 1 days'));
-			$result = array();
-			$res = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate)->row(0);
-			if ($res->date != null){
-					$result[] = $res;
-			}
-			$i = 1;
-			while ($i <= $prevMonths){	
-				$addMonth = " + 1 months"; 
-				$subMonth = " - " . $i . " months"; 
-				$start = date('Y-m-d', strtotime($startDate . $subMonth));
-				$end = date('Y-m-d', strtotime($start . $addMonth));
-				$res =	$this->rangeDataRaw($_GET["uid"], $start, $end)->row(0);	
-				if ($res->date != null){
-					$result[] = $res;
-				}
-				
-				$i++;
-			}
-			$result = array_reverse($result);
-			echo json_encode($result);
-
-		} else {
-			echo "ERROR: NOT ALL FIELDS FILLED";
-		}	
-	}
-
 	public function weekData(){
-		if (isset($_GET["uid"])){
-			$this->load->model("connector");
+		if (isset($_GET["uid"])){			
 			if (isset($_GET["date"])){
 				$date = $_GET["date"];
 			} else {
@@ -406,10 +376,88 @@ class main extends CI_Controller {
 			echo "ERROR: NOT ALL FIELDS FILLED";
 		}	
 	}
+	
+	public function curWeekDataByUser($uid){
+		$date = date("Y-m-d");
+		$start = $this->getStartOfWeek($date);
+		$end = date('Y-m-d', strtotime($date. ' + 1 days'));
+		$res = $this->rangeDataRaw($uid, $start, $end)->row(0);
+		if ($res->date != null){
+			return $res->usage;
+		} else {
+			return 0;
+		}		
+	}
+
+	public function curMonthDataByUser($uid){
+		$date = date("Y-m-d");
+		$start = $this->getStartOfMonth($date);
+		$end = date('Y-m-d', strtotime($date. ' + 1 days'));
+		$res = $this->rangeDataRaw($uid, $start, $end)->row(0);
+		if ($res->date != null){
+			return $res->usage;
+		} else {
+			return 0;
+		}		
+	}
+
+	public function curYearDataByUser($uid){
+		$date = date("Y-m-d");
+		$start = $this->getStartOfYear($date);
+		$end = date('Y-m-d', strtotime($date. ' + 1 days'));
+		$res = $this->rangeDataRaw($uid, $start, $end)->row(0);
+		if ($res->date != null){
+			return $res->usage;
+		} else {
+			return 0;
+		}
+	}
+
+	public function monthData(){
+		if (isset($_GET["uid"])){			
+			if (isset($_GET["date"])){
+				$date = $_GET["date"];
+			} else {
+				$date = date("Y-m-d");
+			}
+
+			if (!isset($_GET["prev"])){
+				$prevMonths = 0;
+			} else {
+				$prevMonths = intval($_GET["prev"]);
+			}
+
+			$startDate = $this->getStartOfMonth($date);
+			//Include current day
+			$endDate = date('Y-m-d', strtotime($date. ' + 1 days'));
+			$result = array();
+			$res = $this->rangeDataRaw($_GET["uid"], $startDate, $endDate)->row(0);
+			if ($res->date != null){
+					$result[] = $res;
+			}
+			$i = 1;
+			while ($i <= $prevMonths){	
+				$addMonth = " + 1 months"; 
+				$subMonth = " - " . $i . " months"; 
+				$start = date('Y-m-d', strtotime($startDate . $subMonth));
+				$end = date('Y-m-d', strtotime($start . $addMonth));
+				$res =	$this->rangeDataRaw($_GET["uid"], $start, $end)->row(0);	
+				if ($res->date != null){
+					$result[] = $res;
+				}				
+				$i++;
+			}
+			$result = array_reverse($result);
+			echo json_encode($result);
+
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}	
+	}
+
 
 	public function yearData(){
 		if (isset($_GET["uid"])){
-			$this->load->model("connector");
 			if (isset($_GET["date"])){
 				$date = $_GET["date"];
 			} else {
@@ -446,7 +494,6 @@ class main extends CI_Controller {
 		}	
 	}
 
-
 	function getStartOfWeek($inDate) {
 		$date = strtotime( date('Y-m-d', strtotime($inDate))); 		
 		if ($num = date('N', strtotime($inDate)) == 7){
@@ -467,6 +514,5 @@ class main extends CI_Controller {
 		$date = date('Y-01-01', strtotime($inDate)); 				
 		return $date;
 	}
-
 }
 ?>

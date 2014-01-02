@@ -40,7 +40,7 @@ class Connector extends CI_Model {
 	}
 
 	function getFriendships($uid1){
-		$query_string = "SELECT * FROM friends WHERE uid_1 = " . $uid1;
+		$query_string = "SELECT uid_2 as uid FROM friends WHERE uid_1 = " . $uid1;
 		return $this->db->query($query_string);
 	}
 
