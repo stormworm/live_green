@@ -44,6 +44,18 @@ class main extends CI_Controller {
 				case "yearData":
 					$this->yearData();
 					break;				
+				case "sendInvite":
+					$this->sendInvite();
+					break;
+				case "getInvites":
+					$this->getInvites();
+					break;
+				case "getRequests":
+					$this->getRequests();
+					break;
+				case "getFriendships":
+					$this->getFriendships();
+					break;
 			}
 		} else {
 			echo "ERROR";
@@ -82,14 +94,13 @@ class main extends CI_Controller {
 		} 
 	}
 
-	public function addFriendship(){		
+	public function sendInvite(){
 		if (isset($_GET["uid_1"]) && isset($_GET["friend_email"])){
 			$this->load->model("connector");
-			$friend_id = $this->connector->getUserIDFromEmail($_GET["friend_email"]);
-			$ret_data = $this->connector->addNewFriendship($_GET["uid_1"], $friend_id);	
+			$friend_id = $this->connector->getUserIDFromEmail($_GET["friend_email"]);			
+			$ret_data = $this->connector->setInvite($_GET["uid_1"], $friend_id);
 			if ($ret_data != NULL){
-				$data = array("uid_1"=>$_GET["uid_1"], "uid_2"=>$friend_id);
-				echo "[" . json_encode($data) . "]";
+				echo "SUCCESS";
 			} else {
 				echo "ERROR: FRIENDSHIP NOT ADDED";	
 			}
@@ -98,24 +109,62 @@ class main extends CI_Controller {
 		}
 	}
 
-	public function getFriendships(){
-		if (isset($_GET["uid"])){
-			$this->load->model("connector");			
-			$result = $this->connector->getFriendships($_GET["uid"]);
-			$jsonRes = array();
-			foreach ($result->result() as $row){
-				$resArray = array();				
-				$uid = intval($row->uid);
-				$friendName = $this->getUserInfo($uid)->row(0)->name;				
-				$resArray = array("uid"=>$uid, "name"=>$friendName, "week"=>$this->curWeekDataByUser($uid), 
-					"month"=>$this->curMonthDataByUser($uid),"year"=>$this->curYearDataByUser($uid));
-				$jsonRes[] = $resArray;
+	public function addFriendship(){		
+		if (isset($_GET["uid_1"]) && isset($_GET["uid_2"])){
+			$this->load->model("connector");
+			$friend_id = $_GET["uid_2"];
+			$ret_data = $this->connector->addNewFriendship($_GET["uid_1"], $friend_id);	
+			if ($ret_data){
+				echo "SUCCESS";
+			} else {
+				echo "ERROR: FRIENDSHIP NOT ADDED";	
 			}
-			echo json_encode($jsonRes);
 		} else {
 			echo "ERROR: NOT ALL FIELDS FILLED";
 		}
 	}
+
+	public function friendSequence($uid, $stat){
+			$this->load->model("connector");			
+			$result = $this->connector->getFriendships($uid);
+			$jsonRes = array();
+			foreach ($result->result() as $row){
+				$status = intval($row->status);
+				if ($status == $stat){
+					$resArray = array();				
+					$uid = intval($row->uid);
+					$friendName = $this->getUserInfo($uid)->row(0)->name;
+					$resArray = array("uid"=>$uid, "name"=>$friendName, "week"=>$this->curWeekDataByUser($uid), 
+						"month"=>$this->curMonthDataByUser($uid),"year"=>$this->curYearDataByUser($uid));
+					$jsonRes[] = $resArray;
+				}
+			}
+			echo json_encode($jsonRes);		
+	}
+
+	public function getInvites(){
+		if (isset($_GET["uid"])){
+			$this->friendSequence($_GET["uid"], 2);
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}
+	}
+
+	public function getRequests(){
+		if (isset($_GET["uid"])){
+			$this->friendSequence($_GET["uid"], 1);
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}
+	}
+
+	public function getFriendships(){
+		if (isset($_GET["uid"])){
+			$this->friendSequence($_GET["uid"], 0);
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}
+	}	
 
 	public function getFriendshipsWithEmail(){
 		if (isset($_GET["email"])){
@@ -139,8 +188,7 @@ class main extends CI_Controller {
 			return $result;
 		} else {
 			return NULL;
-		}
-		
+		}		
 	}
 
 	public function getUserByID(){
@@ -455,7 +503,6 @@ class main extends CI_Controller {
 		}	
 	}
 
-
 	public function yearData(){
 		if (isset($_GET["uid"])){
 			if (isset($_GET["date"])){
@@ -470,7 +517,7 @@ class main extends CI_Controller {
 			}
 			$startOfYear = $this->getStartOfYear($date);
 			$endDate = date('Y-m-d', strtotime($date. ' + 1 days'));
-			$result = array();
+			$result = array();			
 			$res = $this->rangeDataRaw($_GET["uid"], $startOfYear, $endDate)->row(0);
 			if ($res->date != null){
 					$result[] = $res;
@@ -514,5 +561,10 @@ class main extends CI_Controller {
 		$date = date('Y-01-01', strtotime($inDate)); 				
 		return $date;
 	}
+
+
+
+
+
 }
 ?>

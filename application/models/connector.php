@@ -28,9 +28,9 @@ class Connector extends CI_Model {
 		return $this->db->query($query_string);
 	}
 
-	function addNewFriendship($uid1, $uid2){
-		$data1 = array('uid_1'=>$uid1, 'uid_2'=>$uid2);
-		$data2 = array('uid_1'=>$uid2, 'uid_2'=>$uid1);
+	function setInvite($uid1, $uid2){
+		$data1 = array('uid_1'=>$uid1, 'uid_2'=>$uid2, 'is_invite'=>2);
+		$data2 = array('uid_1'=>$uid2, 'uid_2'=>$uid1, 'is_invite'=>1);
 		try{
 			$this->db->insert('friends', $data2);
 			return $this->db->insert('friends', $data1);			
@@ -39,8 +39,20 @@ class Connector extends CI_Model {
 		}
 	}
 
+	function addNewFriendship($uid1, $uid2){
+		$data1 = array('uid_1'=>$uid1, 'uid_2'=>$uid2, 'is_invite'=>0);
+		$data2 = array('uid_1'=>$uid2, 'uid_2'=>$uid1, 'is_invite'=>0);		
+		try{
+			$this->db->update('friends', $data2, array('uid_1'=>$uid2, 'uid_2'=>$uid1));
+			$this->db->update('friends', $data1, array('uid_1'=>$uid1, 'uid_2'=>$uid2));			
+			return true;
+		}catch (Exception $e){
+			return NULL;
+		}
+	}
+
 	function getFriendships($uid1){
-		$query_string = "SELECT uid_2 as uid FROM friends WHERE uid_1 = " . $uid1;
+		$query_string = "SELECT uid_2 as uid, is_invite as status FROM friends WHERE uid_1 = " . $uid1;
 		return $this->db->query($query_string);
 	}
 
