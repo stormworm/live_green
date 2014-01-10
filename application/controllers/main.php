@@ -56,6 +56,9 @@ class main extends CI_Controller {
 				case "getFriendships":
 					$this->getFriendships();
 					break;
+				case "removeFriendship":
+					$this->removeFriendship();
+					break;
 			}
 		} else {
 			echo "ERROR";
@@ -97,12 +100,16 @@ class main extends CI_Controller {
 	public function sendInvite(){
 		if (isset($_GET["uid_1"]) && isset($_GET["friend_email"])){
 			$this->load->model("connector");
-			$friend_id = $this->connector->getUserIDFromEmail($_GET["friend_email"]);			
-			$ret_data = $this->connector->setInvite($_GET["uid_1"], $friend_id);
-			if ($ret_data != NULL){
-				echo "SUCCESS";
+			$friend_id = $this->connector->getUserIDFromEmail($_GET["friend_email"]);
+			if ($friend_id == NULL){
+				echo "USER " . $_GET["friend_email"] . " DOES NOT EXIST";				
 			} else {
-				echo "ERROR: FRIENDSHIP NOT ADDED";	
+				$ret_data = $this->connector->setInvite($_GET["uid_1"], $friend_id);
+				if ($ret_data != NULL){
+					echo "SUCCESS";
+				} else {
+					echo "ERROR: FRIENDSHIP NOT ADDED";	
+				}
 			}
 		} else {
 			echo "ERROR: NOT ALL FIELDS FILLED";
@@ -164,7 +171,7 @@ class main extends CI_Controller {
 		} else {
 			echo "ERROR: NOT ALL FIELDS FILLED";
 		}
-	}	
+	}		
 
 	public function getFriendshipsWithEmail(){
 		if (isset($_GET["email"])){
@@ -190,6 +197,22 @@ class main extends CI_Controller {
 			return NULL;
 		}		
 	}
+
+	public function removeFriendship(){
+		if (isset($_GET["uid_1"]) && isset($_GET["uid_2"])){
+			$this->load->model("connector");
+			$friend_id = $_GET["uid_2"];
+			$ret_data = $this->connector->removeFriendship($_GET["uid_1"], $friend_id);	
+			if ($ret_data){
+				echo "SUCCESS";
+			} else {
+				echo "ERROR: FRIENDSHIP NOT ADDED";	
+			}
+		} else {
+			echo "ERROR: NOT ALL FIELDS FILLED";
+		}
+	}
+
 
 	public function getUserByID(){
 		if (isset($_GET["uid"])){
@@ -561,10 +584,5 @@ class main extends CI_Controller {
 		$date = date('Y-01-01', strtotime($inDate)); 				
 		return $date;
 	}
-
-
-
-
-
 }
 ?>

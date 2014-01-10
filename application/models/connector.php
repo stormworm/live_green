@@ -32,11 +32,38 @@ class Connector extends CI_Model {
 		$data1 = array('uid_1'=>$uid1, 'uid_2'=>$uid2, 'is_invite'=>2);
 		$data2 = array('uid_1'=>$uid2, 'uid_2'=>$uid1, 'is_invite'=>1);
 		try{
-			$this->db->insert('friends', $data2);
-			return $this->db->insert('friends', $data1);			
+			
+			$query_string = "SELECT * FROM friends WHERE uid_1 = " . $uid2 . " AND uid_2 = " . $uid1 . " AND is_invite = 2";
+			$res3 = $this->db->query($query_string);
+
+			if ($res3->num_rows() == 1){
+				$this->addNewFriendship($uid1, $uid2);
+				return 1;
+			}
+			//repeat request
+			$query_string = "SELECT * FROM friends WHERE uid_1 = " . $uid1 . " AND uid_2 = " . $uid2 . " AND is_invite = 2";
+			$res1 = $this->db->query($query_string);			
+
+			//alrady friends
+			$query_string = "SELECT * FROM friends WHERE uid_1 = " . $uid1 . " AND uid_2 = " . $uid2 . " AND is_invite = 0";
+			$res2 = $this->db->query($query_string);
+			
+			if ($res1->num_rows() == 0 and $res2->num_rows() == 0){
+				$this->db->insert('friends', $data2);
+				return $this->db->insert('friends', $data1);
+			} else {
+				return null;
+			}
 		}catch (Exception $e){
 			return NULL;
 		}
+	}
+
+	function removeFriendship($uid1, $uid2){
+		$data1 = array('uid_1'=>$uid1, 'uid_2'=>$uid2);
+		$data2 = array('uid_1'=>$uid2, 'uid_2'=>$uid1);
+		$this->db->delete('friends', $data1);
+		return $this->db->delete('friends', $data2);
 	}
 
 	function addNewFriendship($uid1, $uid2){
@@ -59,8 +86,9 @@ class Connector extends CI_Model {
 	function getUserIDFromEmail($email){
 		$query_string = "SELECT id FROM users WHERE email = '". $email ."'";		
 		$result = $this->db->query($query_string);
-		//TODO: CHECK WHAT THIS ACTUALLY RETURNS
-		return $result->row(0)->id;
+		if ($result->result_array() != null){
+			return $result->row(0)->id;
+		}		
 	}
 
 	function getUserByID($uid){
